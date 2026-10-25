@@ -125,7 +125,28 @@ footer { text-align: center; color: var(--muted); font-size: 10px; margin-top: 3
       <div class="eyebrow">DIGITAL DEPARTMENT / 001</div>
       <h2>Добро пожаловать.</h2>
       <p class="intro">Выберите доступную процедуру. Все результаты носят развлекательный характер.</p>
-      <div class="eyebrow">ДОСТУПНЫЕ ПРОЦЕДУРЫ</div>
+      <div class="eyebrow">ДОСТУПНЫЕ ПРОЦЕДУРЫ</div><div class="cards">
+  <button class="card" onclick="openPage('test')">
+    <div class="symbol">▤</div>
+    <strong>Обследование</strong>
+    <small>Небольшой тест о вашем способе общения</small>
+  </button>
+  <button class="card" onclick="openPage('question')">
+    <div class="symbol">↻</div>
+    <strong>Случайный вопрос</strong>
+    <small>Новая тема для разговора во флуде</small>
+  </button>
+  <button class="card" onclick="openPage('bingo')">
+    <div class="symbol">▦</div>
+    <strong>Бинго</strong>
+    <small>Отмечайте подходящие клетки</small>
+  </button>
+  <button class="card" onclick="openPage('about')">
+    <div class="symbol">♡</div>
+    <strong>О проекте</strong>
+    <small>Информация об отделении</small>
+  </button>
+</div>
       <div class="cards">
         <button class="card" onclick="openPage('test')">
           <div class="symbol">▤</div>

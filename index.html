@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#E8F0EF">
+<title>ANAMNESIS — digital department</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root {
+  --accent: #7FAAA6;
+  --paper: #E8F0EF;
+  --ink: #475A59;
+  --muted: #829391;
+  --white: #FFFFFF;
+  --line: #D5E2DF;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+}
+button { font: inherit; cursor: pointer; }
+.app {
+  width: min(100%, 540px);
+  margin: auto;
+  padding: 24px 18px 40px;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0 22px;
+}
+.logo {
+  width: 54px; height: 54px;
+  background: var(--accent);
+  color: white;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 27px;
+}
+h1 { font-size: 22px; letter-spacing: 2px; margin: 0 0 5px; }
+.subtitle { font-size: 10px; letter-spacing: 1px; }
+.line { border: 0; border-top: 1px solid var(--line); }
+.eyebrow {
+  font-size: 10px; letter-spacing: 1.5px;
+  color: var(--muted); margin: 23px 0 10px;
+}
+h2 { font-size: 21px; margin: 8px 0; }
+p { line-height: 1.55; }
+.intro { font-size: 14px; color: #687B79; }
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 17px 14px;
+  min-height: 132px;
+  text-align: left;
+  color: var(--ink);
+  transition: transform .15s;
+}
+.card:active { transform: scale(.98); }
+.symbol { font-size: 24px; margin-bottom: 15px; }
+.card strong { display: block; font-size: 14px; margin-bottom: 6px; }
+.card small { color: var(--muted); line-height: 1.4; }
+.panel {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 19px;
+  margin-top: 15px;
+}
+.primary, .secondary {
+  width: 100%;
+  padding: 13px 15px;
+  border-radius: 10px;
+  border: 0;
+  margin-top: 10px;
+  font-weight: 600;
+}
+.primary { background: var(--accent); color: white; }
+.secondary { background: var(--paper); color: var(--ink); }
+.answer {
+  display: block; width: 100%; text-align: left;
+  padding: 13px; margin: 9px 0;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: white; color: var(--ink);
+}
+.answer.selected { background: var(--paper); border-color: var(--accent); }
+.bingo {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px;
+  margin-top: 15px;
+}
+.cell {
+  min-height: 91px; padding: 8px 4px;
+  background: white; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 10px;
+  font-size: 12px; overflow-wrap: anywhere;
+}
+.cell.marked { background: var(--accent); color: white; }
+.hidden { display: none !important; }
+.back { border: 0; background: transparent; color: var(--ink); padding: 8px 0; }
+footer { text-align: center; color: var(--muted); font-size: 10px; margin-top: 30px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">✚</div>
+    <div>
+      <h1>ANAMNESIS</h1>
+      <div class="subtitle">ЦЕНТР ИНТЕРАКТИВНЫХ ИССЛЕДОВАНИЙ</div>
+    </div>
+  </header>
+  <hr class="line">
+
+  <main>
+    <section id="home">
+      <div class="eyebrow">DIGITAL DEPARTMENT / 001</div>
+      <h2>Добро пожаловать.</h2>
+      <p class="intro">Выберите доступную процедуру. Все результаты носят развлекательный характер.</p>
+      <div class="eyebrow">ДОСТУПНЫЕ ПРОЦЕДУРЫ</div>
+      <div class="cards">
+        <button class="card" onclick="openPage('test')">
+          <div class="symbol">▤</div>
+          <strong>Обследование</strong>
+          <small>Небольшой тест о вашем способе общения</small>
+        </button><div class="symbol">↻</div>
+          <strong>Случайный вопрос</strong>
+          <small>Новая тема для разговора во флуде</small>
+        </button>
+        <button class="card" onclick="openPage('bingo')">
+          <div class="symbol">▦</div>
+          <strong>Бинго</strong>
+          <small>Отмечайте подходящие клетки</small>
+        </button>
+        <button class="card" onclick="openPage('about')">
+          <div class="symbol">♡</div>
+          <strong>О проекте</strong>
+          <small>Информация об отделении</small>
+        </button>
+      </div>
+    </section>
+
+    <section id="test" class="hidden">
+      <button class="back" onclick="home()">← Главное меню</button>
+      <div class="eyebrow">ASSESSMENT / 001</div>
+      <h2>Как вы общаетесь?</h2>
+      <p class="intro">Выберите вариант, который чаще всего вам подходит.</p>
+      <div id="testArea"></div>
+      <button id="nextBtn" class="primary" onclick="nextQuestion()">Далее</button>
+      <div id="testResult" class="panel hidden"></div>
+    </section>
+
+    <section id="question" class="hidden">
+      <button class="back" onclick="home()">← Главное меню</button>
+      <div class="eyebrow">RANDOM PROMPT / 002</div>
+      <h2>Вопрос для обсуждения</h2>
+      <div class="panel">
+        <div class="eyebrow">ВОПРОС № <span id="qNum">01</span></div>
+        <p id="questionText">Нажмите кнопку, чтобы получить вопрос.</p>
+        <button class="primary" onclick="newQuestion()">Получить вопрос</button>
+        <button class="secondary" onclick="copyQuestion()">Скопировать вопрос</button>
+        <div id="copyStatus" class="intro"></div>
+      </div>
+    </section>
+
+    <section id="bingo" class="hidden">
+      <button class="back" onclick="home()">← Главное меню</button>
+      <div class="eyebrow">INTERACTIVE CARD / 003</div>
+      <h2>Бинго участника</h2>
+      <p class="intro">Нажимайте на клетки, которые вам подходят.</p>
+      <div id="bingoGrid" class="bingo"></div>
+      <p id="bingoCount" class="intro">Отмечено: 0 из 9</p>
+      <button class="secondary" onclick="resetBingo()">Сбросить отметки</button>
+    </section>
+
+    <section id="about" class="hidden">
+      <button class="back" onclick="home()">← Главное меню</button>
+      <div class="eyebrow">PROJECT INFORMATION / 004</div>
+      <h2>Об отделении</h2>
+      <div class="panel">
+        <p><strong>ANAMNESIS</strong></p>
+        <p>Цифровое пространство для интерактивов, общения и небольших развлекательных обследований.</p>
+        <hr class="line">
+        <p class="intro">Материалы сайта не являются профессиональной психологической диагностикой. Ответы и результаты предназначены для саморефлексии и развлечения.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>ANAMNESIS · DIGITAL DEPARTMENT · V.01</footer>
+</div>
+
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
+
+function openPage(id) {
+  document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+function home() { openPage('home'); }
+
+const questions = [
+  { q: 'Если меня что-то беспокоит, я обычно…', a: [
+    ['Обсуждаю это с близким человеком', 2],
+    ['Сначала разбираюсь самостоятельно', 1],
+    ['Избегаю разговора, пока не станет легче', 0]
+  ]},
+  { q: 'Когда человек долго не отвечает, я…', a: [
+    ['Спокойно занимаюсь своими делами', 2],
+    ['Иногда начинаю переживать', 1],
+    ['Часто думаю, что что-то не так', 0]
+  ]},
+  { q: 'Мне проще всего…', a: [
+    ['Говорить о своих потребностях', 2],
+    ['Делиться ими постепенно', 1],
+    ['Скрывать их даже от близких', 0]
+  ]}
+];
+let qi = 0, score = 0, chosen = false;
+function renderQuestion() {
+  const q = questions[qi];
+  document.getElementById('testArea').innerHTML =
+        <button class="card" onclick="openPage('question')"><div class="symbol">↻</div>
+          <strong>Случайный вопрос</strong>
+          <small>Новая тема для разговора во флуде</small>
+        </button>
+        <button class="card" onclick="openPage('bingo')">
+          <div class="symbol">▦</div>
+          <strong>Бинго</strong>
+          <small>Отмечайте подходящие клетки</small>
+        </button>
+        <button class="card" onclick="openPage('about')">
+          <div class="symbol">♡</div>
+          <strong>О проекте</strong>
+          <small>Информация об отделении</small>
+        </button>
+      </div>
+    </section>
+
+    <section id="test" class="hidden">
+      <button class="back" onclick="home()">← Главное меню</button>
+      <div class="eyebrow">ASSESSMENT / 001</div>
+      <h2>Как вы общаетесь?</h2>
+      <p class="intro">Выберите вариант, который чаще всего вам подходит.</p>
+      <div id="testArea"></div>
+      <button id="nextBtn" class="primary" onclick="nextQuestion()">Далее</button>
+      <div id="testResult" class="panel hidden"></div>
+    </section>
+
+    <section id="question" class="hidden">
+      <button class="back" onclick="home()">← Главное меню</button>
+      <div class="eyebrow">RANDOM PROMPT / 002</div>
+      <h2>Вопрос для обсуждения</h2>
+      <div class="panel">
+        <div class="eyebrow">ВОПРОС № <span id="qNum">01</span></div>
+        <p id="questionText">Нажмите кнопку, чтобы получить вопрос.</p>
+        <button class="primary" onclick="newQuestion()">Получить вопрос</button>
+        <button class="secondary" onclick="copyQuestion()">Скопировать вопрос</button>
+        <div id="copyStatus" class="intro"></div>
+      </div>
+    </section>
+
+    <section id="bingo" class="hidden">
+      <button class="back" onclick="home()">← Главное меню</button>
+      <div class="eyebrow">INTERACTIVE CARD / 003</div>
+      <h2>Бинго участника</h2>
+      <p class="intro">Нажимайте на клетки, которые вам подходят.</p>
+      <div id="bingoGrid" class="bingo"></div>
+      <p id="bingoCount" class="intro">Отмечено: 0 из 9</p>
+      <button class="secondary" onclick="resetBingo()">Сбросить отметки</button>
+    </section>
+
+    <section id="about" class="hidden">
+      <button class="back" onclick="home()">← Главное меню</button>
+      <div class="eyebrow">PROJECT INFORMATION / 004</div>
+      <h2>Об отделении</h2>
+      <div class="panel">
+        <p><strong>ANAMNESIS</strong></p>
+        <p>Цифровое пространство для интерактивов, общения и небольших развлекательных обследований.</p>
+        <hr class="line">
+        <p class="intro">Материалы сайта не являются профессиональной психологической диагностикой. Ответы и результаты предназначены для саморефлексии и развлечения.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>ANAMNESIS · DIGITAL DEPARTMENT · V.01</footer>
+</div>
+
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
+
+function openPage(id) {
+  document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+function home() { openPage('home'); }
+
+const questions = [
+  { q: 'Если меня что-то беспокоит, я обычно…', a: [
+    ['Обсуждаю это с близким человеком', 2],
+    ['Сначала разбираюсь самостоятельно', 1],
+    ['Избегаю разговора, пока не станет легче', 0]
+  ]},
+  { q: 'Когда человек долго не отвечает, я…', a: [
+    ['Спокойно занимаюсь своими делами', 2],
+    ['Иногда начинаю переживать', 1],
+    ['Часто думаю, что что-то не так', 0]
+  ]},
+  { q: 'Мне проще всего…', a: [
+    ['Говорить о своих потребностях', 2],
+    ['Делиться ими постепенно', 1],
+    ['Скрывать их даже от близких', 0]
+  ]}
+];
+let qi = 0, score = 0, chosen = false;
+function renderQuestion() {
+  const q = questions[qi];'<p><strong>Вопрос ' + (qi+1) + ' из ' + questions.length + '</strong></p>' +
+    '<p>' + q.q + '</p>' +
+    q.a.map((a,i) => '<button class="answer" onclick="chooseAnswer(' + i + ')">' + a[0] + '</button>').join('');
+  document.getElementById('nextBtn').textContent = qi === questions.length-1 ? 'Узнать результат' : 'Далее';
+  chosen = false;
+}
+function chooseAnswer(i) {
+  if (chosen) return;
+  chosen = true;
+  score += questions[qi].a[i][1];
+  document.querySelectorAll('#testArea .answer')[i].classList.add('selected');
+}
+function nextQuestion() {
+  if (!chosen) {
+    alert('Сначала выберите ответ.');
+    return;
+  }
+  if (qi < questions.length - 1) {
+    qi++;
+    renderQuestion();
+  } else {
+    document.getElementById('testArea').classList.add('hidden');
+    document.getElementById('nextBtn').classList.add('hidden');
+    const result = document.getElementById('testResult');
+    let title = score >= 5 ? 'Открытость в общении' : score >= 3 ? 'Избирательность в общении' : 'Осторожность в общении';
+    result.innerHTML = '<h3>' + title + '</h3><p>Ваши ответы показывают лишь один из возможных способов общения. Это не психологическое заключение и не диагноз.</p><button class="secondary" onclick="restartTest()">Пройти ещё раз</button>';
+    result.classList.remove('hidden');
+  }
+}
+function restartTest() {
+  qi = 0; score = 0; chosen = false;
+  document.getElementById('testArea').classList.remove('hidden');
+  document.getElementById('nextBtn').classList.remove('hidden');
+  document.getElementById('testResult').classList.add('hidden');
+  renderQuestion();
+}
+renderQuestion();
+
+const prompts = [
+  'Какую маленькую вещь вы любите больше, чем большинство людей?',
+  'Какой вымышленный мир вы хотели бы посетить?',
+  'Какую песню вы можете переслушивать бесконечно?',
+  'Какой факт о вас обычно удивляет новых знакомых?',
+  'Как выглядит ваш идеальный выходной?',
+  'Какую привычку вы хотели бы приобрести?',
+  'Какого персонажа вы понимаете лучше остальных?',
+  'Какое воспоминание всегда вызывает у вас улыбку?',
+  'Что вы давно хотите попробовать?',
+  'Какой жанр историй вам никогда не надоедает?'
+];
+let currentPrompt = '';
+function newQuestion() {
+  let next = prompts[Math.floor(Math.random() * prompts.length)];
+  if (prompts.length > 1) while (next === currentPrompt) next = prompts[Math.floor(Math.random() * prompts.length)];
+  currentPrompt = next;
+  document.getElementById('questionText').textContent = next;
+  document.getElementById('qNum').textContent = String(prompts.indexOf(next)+1).padStart(2,'0');
+  document.getElementById('copyStatus').textContent = '';
+}
+async function copyQuestion() {
+  if (!currentPrompt) {
+    document.getElementById('copyStatus').textContent = 'Сначала получите вопрос.';
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(currentPrompt);
+    document.getElementById('copyStatus').textContent = 'Вопрос скопирован.';
+  } catch(e) {
+    document.getElementById('copyStatus').textContent = currentPrompt;
+  }
+}
+
+const bingoItems = [
+  'Люблю музыку','Сижу допоздна','Есть любимый фандом',
+  'Часто слушаю музыку','Люблю читать','Есть питомец',
+  'Смотрю аниме','Люблю переписки','Нравится дождь'
+];
+function buildBingo() {
+  document.getElementById('bingoGrid').innerHTML = bingoItems.map((item,i) =>
+    '<button class="cell" onclick="toggleCell(this)" aria-pressed="false">' + item + '</button>'
+  ).join('');
+}
+function toggleCell(el) {
+  el.classList.toggle('marked');
+  el.setAttribute('aria-pressed', el.classList.contains('marked'));
+  const count = document.querySelectorAll('.cell.marked').length;
+  document.getElementById('bingoCount').textContent = 'Отмечено: ' + count + ' из 9';
+}
+function resetBingo() {
+  document.querySelectorAll('.cell').forEach(el => {
+    el.classList.remove('marked');
+    el.setAttribute('aria-pressed','false');
+  });
+  document.getElementById('bingoCount').textContent = 'Отмечено: 0 из 9';
+}
+buildBingo();
+</script>
+</body>
+</html>
+  document.getElementById('testArea').innerHTML =
